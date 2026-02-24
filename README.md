@@ -152,5 +152,6 @@
 <img width="1174" height="842" alt="db" src="https://github.com/user-attachments/assets/358cf4d0-7e4d-4fd7-997d-68ab7b8aada8" />
 
 [создание БД](../db/creation.sql)
-[инициализация БД](../db/init.sql)
+
+[инициализация БД](https://github.com/BukiCoder/webprac/blob/main/db/init.sql)
 

@@ -15,7 +15,7 @@ public class CarFilter extends CommonFilter {
 
     public Long id;
 
-    public Long configurationId;
+    public CarConfiguration configuration;
 
     public String VIN;
 

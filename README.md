@@ -206,3 +206,7 @@
 [создание БД](https://github.com/BukiCoder/webprac/blob/main/db/creation.sql)
 
 [инициализация БД](https://github.com/BukiCoder/webprac/blob/main/db/init.sql)
+## Резултаты тестирования
+<img width="1243" height="270" alt="image" src="https://github.com/user-attachments/assets/23a5d9bd-def3-46d2-be77-a43ed9e43c1f" />
+
+

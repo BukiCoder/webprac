@@ -207,6 +207,5 @@
 
 [инициализация БД](https://github.com/BukiCoder/webprac/blob/main/db/init.sql)
 ## Резултаты тестирования
-<img width="1243" height="270" alt="image" src="https://github.com/user-attachments/assets/23a5d9bd-def3-46d2-be77-a43ed9e43c1f" />
-
+<img width="1621" height="289" alt="тесты" src="https://github.com/user-attachments/assets/e7be6b85-239c-45cc-9278-309215136b38" />
 

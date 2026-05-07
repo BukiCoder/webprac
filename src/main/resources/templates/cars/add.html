@@ -1,0 +1,64 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{header :: layout(~{::content})}">
+<head>
+    <title>Добавить автомобиль</title>
+</head>
+<body>
+<div th:fragment="content">
+    <h2>Добавление нового автомобиля</h2>
+    <form th:action="@{/cars/add}" method="post" th:object="${car}">
+        <div>
+            <label>VIN: <input type="text" th:field="*{VIN}" required/></label>
+        </div>
+        <div>
+            <label>Модель и комплектация:
+                <select th:field="*{configuration.id}" required>
+                    <option value="">-- Выберите --</option>
+                    <option th:each="config : ${configurations}" th:value="${config.id}"
+                            th:text="${config.model.brand.name + ' ' + config.model.name + ' - ' + config.name}"></option>
+                </select>
+            </label>
+        </div>
+        <div>
+            <label>Цена: <input type="number" th:field="*{cost}" required/></label>
+        </div>
+        <div>
+            <label>Цвет кузова: <input type="text" th:field="*{color}" required/></label>
+        </div>
+        <div>
+            <label>Цвет салона: <input type="text" th:field="*{interiorColor}" required/></label>
+        </div>
+        <div>
+            <label>Обивка сидений: <input type="text" th:field="*{seatUpholstery}"/></label>
+        </div>
+        <div>
+            <label>Новая: <input type="checkbox" th:field="*{isNew}"/></label>
+        </div>
+        <div>
+            <label>Пробег: <input type="number" th:field="*{mileage}"/></label>
+        </div>
+        <div>
+            <label>Год выпуска: <input type="number" th:field="*{year}" required/></label>
+        </div>
+        <div>
+            <label>Дата последнего ТО: <input type="date" th:field="*{lastLtoDate}"/></label>
+        </div>
+        <div>
+            <label>Статус:
+                <select th:field="*{status}">
+                    <option th:each="s : ${T(web_prak.models.Car.CarStatus).values()}"
+                            th:value="${s}" th:text="${s}"></option>
+                </select>
+            </label>
+        </div>
+        <div>
+            <label>URL фото: <input type="text" th:field="*{imageSrc}"/></label>
+        </div>
+        <div>
+            <label>Доступен тест-драйв: <input type="checkbox" th:field="*{isTestDriveAvailable}"/></label>
+        </div>
+        <button type="submit">Добавить</button>
+    </form>
+</div>
+</body>
+</html>

@@ -1,0 +1,381 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{header :: layout(~{::content})}">
+<head>
+    <title>Личный кабинет</title>
+
+</head>
+<body>
+<div th:fragment="content">
+    <style>
+        .cabinet-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            border: 1px solid #f0f0f0;
+        }
+
+        .profile-avatar {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.8rem;
+            color: white;
+            box-shadow: 0 8px 20px rgba(102,126,234,0.3);
+            flex-shrink: 0;
+        }
+
+        .profile-main {
+            flex: 1;
+        }
+
+        .profile-main h1 {
+            margin: 0 0 0.2rem 0;
+            font-size: 1.8rem;
+            color: #2c3e50;
+            font-weight: 700;
+        }
+
+        .profile-main .welcome {
+            color: #666;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .profile-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem 2rem;
+            width: 100%;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .detail-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: #f8f9ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #667eea;
+            flex-shrink: 0;
+        }
+
+        .detail-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-text .label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: #999;
+            font-weight: 600;
+        }
+
+        .detail-text .value {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.95rem;
+        }
+
+        .orders-section h2 {
+            font-size: 1.6rem;
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+            font-weight: 700;
+        }
+
+        .orders-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .order-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            transition: transform 0.25s, box-shadow 0.25s;
+            border: 1px solid #f0f0f0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .order-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+        }
+
+        .order-header {
+            padding: 1.2rem 1.8rem;
+            background: #fafbfc;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
+        .order-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: #2c3e50;
+            font-weight: 700;
+        }
+
+        .status-badge {
+            padding: 0.35rem 1rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: white;
+        }
+
+        .status-new { background: #3498db; }
+        .status-processing { background: #f39c12; }
+        .status-completed { background: #27ae60; }
+        .status-canceled { background: #e74c3c; }
+
+        .order-body {
+            padding: 1.5rem 1.8rem;
+            display: flex;
+            gap: 1.8rem;
+            flex-wrap: wrap;
+        }
+
+        .order-image {
+            width: 180px;
+            height: 130px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #f5f5f5;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .order-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .order-details {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1.2rem;
+            align-content: start;
+        }
+
+        .detail-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .detail-group .label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: #999;
+            font-weight: 700;
+        }
+
+        .detail-group .value {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.95rem;
+        }
+
+        .order-footer {
+            padding: 1rem 1.8rem;
+            background: #fafbfc;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
+        .order-date {
+            color: #888;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .btn-cancel {
+            background: #fff;
+            border: 1.5px solid #e74c3c;
+            color: #e74c3c;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-cancel:hover {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .empty-orders {
+            background: white;
+            border-radius: 16px;
+            padding: 3rem;
+            text-align: center;
+            color: #888;
+            font-size: 1.1rem;
+            border: 1px solid #f0f0f0;
+        }
+
+        .empty-orders-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .profile-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .order-body {
+                flex-direction: column;
+            }
+
+            .order-image {
+                width: 100%;
+                height: 180px;
+            }
+        }
+    </style>
+    <div class="cabinet-container">
+        <div class="profile-card">
+            <div class="profile-main">
+                <h1>Личный кабинет</h1>
+                <p class="welcome">Добро пожаловать, <strong th:text="${client.name}"></strong>!</p>
+                <div class="profile-details">
+                    <div class="detail-item">
+
+                        <div class="detail-text">
+                            <span class="label">Email</span>
+                            <span class="value" th:text="${client.email}"></span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-text">
+                            <span class="label">Телефон</span>
+                            <span class="value" th:text="${client.phone}"></span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-text">
+                            <span class="label">Адрес</span>
+                            <span class="value" th:text="${client.address}"></span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-text">
+                            <span class="label">Регистрация</span>
+                            <span class="value" th:text="${client.registrationDate}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="orders-section">
+            <h2>Мои заказы</h2>
+
+            <div th:if="${#lists.isEmpty(orders)}" class="empty-orders">
+                <div class="empty-orders-icon"></div>
+                <p>У вас пока нет заказов</p>
+                <a th:href="@{/cars}" class="btn" style="margin-top:1rem;">Выбрать автомобиль</a>
+            </div>
+
+            <div class="orders-grid">
+                <div th:each="order : ${orders}" class="order-card">
+                    <div class="order-header">
+                        <h3 th:text="${order.car.configuration.model.brand.name + ' ' + order.car.configuration.model.name}"></h3>
+                        <span class="status-badge"
+                              th:classappend="'status-' + ${#strings.toLowerCase(order.status.toString())}"
+                              th:text="${order.status}"></span>
+                    </div>
+
+                    <div class="order-body">
+                        <div class="order-image">
+                            <img th:src="${'/images' + order.car.imageSrc}" alt="Фото автомобиля"/>
+                        </div>
+                        <div class="order-details">
+                            <div class="detail-group">
+                                <span class="label">VIN номер</span>
+                                <span class="value" th:text="${order.car.VIN}"></span>
+                            </div>
+                            <th:block th:if="${order.testDriveDate != null}">
+                                <div class="detail-group">
+                                    <span class="label">Тест-драйв</span>
+                                    <span class="value">
+                                        <span th:text="${order.testDriveDate}"></span><br/>
+                                        <small style="color:#888;">Длительность: <span th:text="${order.testDriveDuration}"></span> мин</small>
+                                    </span>
+                                </div>
+                            </th:block>
+                            <th:block th:if="${order.deliveryAddress != null}">
+                                <div class="detail-group">
+                                    <span class="label">Доставка</span>
+                                    <span class="value">
+                                        <span th:text="${order.deliveryAddress}"></span><br/>
+                                        <small style="color:#888;">Дата: <span th:text="${order.deliveryDate}"></span></small>
+                                    </span>
+                                </div>
+                            </th:block>
+                        </div>
+                    </div>
+
+                    <div class="order-footer">
+                        <span class="order-date">📅 <span th:text="${order.orderDate}"></span></span>
+                        <th:block th:if="${order.status.toString() != 'canceled' and order.status.toString() != 'completed'}">
+                            <form th:action="@{/orders/{id}/cancel(id=${order.id})}" method="post" style="margin:0;">
+                                <button type="submit" class="btn-cancel"
+                                        onclick="return confirm('Вы уверены, что хотите отменить заказ?')">
+                                    Отменить
+                                </button>
+                            </form>
+                        </th:block>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

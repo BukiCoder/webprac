@@ -1,0 +1,179 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{header :: layout(~{::content})}">
+<head>
+    <title>Оформление заказа</title>
+</head>
+<body>
+<div th:fragment="content">
+    <style>
+        .order-form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .order-form fieldset {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .order-form legend {
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding: 0 0.5rem;
+            width: auto;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.3rem;
+            font-weight: 500;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+        .checkbox-group {
+            margin: 0.75rem 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+        .options-block {
+            margin-left: 1.5rem;
+            padding: 1rem;
+            border-left: 3px solid #3498db;
+            background: #f8f9fa;
+            border-radius: 4px;
+            display: none;
+        }
+        .btn {
+            padding: 0.6rem 1.5rem;
+            font-size: 1rem;
+        }
+        .error-message {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+    </style>
+
+    <div class="order-form">
+        <h2>Оформление заказа</h2>
+        <p>Автомобиль: <strong th:text="${car.configuration.model.brand.name + ' ' + car.configuration.model.name}"></strong> (VIN: <span th:text="${car.VIN}"></span>)</p>
+        <p>Цена: <strong th:text="${car.cost}"></strong> руб.</p>
+
+        <form th:action="@{/orders/create}" method="post" onsubmit="return validateOrderForm()">
+            <input type="hidden" name="carId" th:value="${car.id}"/>
+            <input type="hidden" th:name="${_csrf?.parameterName}" th:value="${_csrf?.token}"/>
+
+            <th:block sec:authorize="hasRole('MANAGER')">
+                <div class="form-group">
+                    <label>Клиент</label>
+                    <select name="clientId" required>
+                        <option th:each="c : ${clients}" th:value="${c.id}" th:text="${c.name + ' (' + c.email + ')'}"></option>
+                    </select>
+                </div>
+            </th:block>
+
+            <fieldset>
+                <legend>Опции</legend>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" name="needTestDrive" id="needTestDrive"
+                           onchange="toggleBlock('testDriveBlock', this)"/>
+                    <label for="needTestDrive">Нужен тест-драйв</label>
+                </div>
+                <div id="testDriveBlock" class="options-block">
+                    <div class="form-group">
+                        <label>Дата и время</label>
+                        <input type="datetime-local" name="testDriveDate" id="testDriveDate"/>
+                    </div>
+                    <div class="form-group">
+                        <label>Длительность (мин)</label>
+                        <input type="number" name="testDriveDuration" id="testDriveDuration" min="1"/>
+                    </div>
+                    <div class="error-message" id="testDriveError">Заполните дату и длительность тест-драйва</div>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" name="needDelivery" id="needDelivery"
+                           onchange="toggleBlock('deliveryBlock', this)"/>
+                    <label for="needDelivery">Нужна доставка</label>
+                </div>
+                <div id="deliveryBlock" class="options-block">
+                    <div class="form-group">
+                        <label>Дата доставки</label>
+                        <input type="date" name="deliveryDate" id="deliveryDate"/>
+                    </div>
+                    <div class="form-group">
+                        <label>Адрес</label>
+                        <input type="text" name="deliveryAddress" id="deliveryAddress" placeholder="Город, улица, дом"/>
+                    </div>
+                    <div class="error-message" id="deliveryError">Заполните дату и адрес доставки</div>
+                </div>
+            </fieldset>
+
+            <p>Итоговая цена: <strong th:text="${car.cost}"></strong> руб. (доп. услуги уточняйте у менеджера)</p>
+            <button type="submit" class="btn">Оформить заказ</button>
+        </form>
+    </div>
+
+    <script>
+        function toggleBlock(blockId, checkbox) {
+            const block = document.getElementById(blockId);
+            if (block) {
+                block.style.display = checkbox.checked ? 'block' : 'none';
+                if (!checkbox.checked) {
+                    const inputs = block.querySelectorAll('input');
+                    inputs.forEach(input => input.value = '');
+                    const error = block.querySelector('.error-message');
+                    if (error) error.style.display = 'none';
+                }
+            }
+        }
+
+        function validateOrderForm() {
+            let valid = true;
+
+            const needTestDrive = document.getElementById('needTestDrive');
+            if (needTestDrive && needTestDrive.checked) {
+                const date = document.getElementById('testDriveDate').value.trim();
+                const duration = document.getElementById('testDriveDuration').value.trim();
+                if (date === '' || duration === '') {
+                    document.getElementById('testDriveError').style.display = 'block';
+                    valid = false;
+                } else {
+                    document.getElementById('testDriveError').style.display = 'none';
+                }
+            }
+
+            const needDelivery = document.getElementById('needDelivery');
+            if (needDelivery && needDelivery.checked) {
+                const date = document.getElementById('deliveryDate').value.trim();
+                const address = document.getElementById('deliveryAddress').value.trim();
+                if (date === '' || address === '') {
+                    document.getElementById('deliveryError').style.display = 'block';
+                    valid = false;
+                } else {
+                    document.getElementById('deliveryError').style.display = 'none';
+                }
+            }
+
+            return valid;
+        }
+    </script>
+</div>
+</body>
+</html>

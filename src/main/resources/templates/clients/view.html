@@ -1,0 +1,213 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{header :: layout(~{::content})}">
+<head>
+    <title th:text="'Клиент ' + ${client.name}"></title>
+</head>
+<body>
+<div th:fragment="content">
+    <style>
+        .car-specs-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem;
+        }
+        .car-specs-table th,
+        .car-specs-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            text-align: left;
+            vertical-align: top;
+        }
+        .car-specs-table th {
+            width: 40%;
+            color: #6c757d;
+            font-weight: 500;
+            font-size: 0.95rem;
+            background-color: #fafbfc;
+        }
+        .car-specs-table td {
+            font-weight: 500;
+            color: #212529;
+            background-color: #ffffff;
+        }
+        .car-specs-table tr:last-child th,
+        .car-specs-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .order-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        div.order-card {
+            border: 1px solid #ddd !important;
+            border-radius: 12px !important;
+            overflow: hidden !important;
+            background: #fff !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+            transition: transform 0.2s, box-shadow 0.2s !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        div.order-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            z-index: 2;
+        }
+        div.order-card div.order-card-body {
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+        }
+        h3.order-card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+            color: #2c3e50;
+        }
+        ul.order-card-specs {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 12px;
+            color: #444;
+            font-size: 0.9rem;
+        }
+        ul.order-card-specs li {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        ul.order-card-specs li:last-child { border-bottom: none; }
+        .spec-label { color: #888; font-weight: 500; }
+        .spec-value { font-weight: 500; text-align: right; }
+
+        .btn, button {
+            padding: 8px 16px;
+            cursor: pointer;
+            text-decoration: none;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            display: inline-block;
+        }
+        .btn:hover, button:hover { background-color: #0056b3; }
+        .danger { background-color: #dc3545; }
+        .danger:hover { background-color: #b02a37; }
+        .btn-warning { background-color: #ffc107; color: black; }
+        .btn-warning:hover { background-color: #e0a800; color: black; }
+
+        .actions-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .edit-form div {
+            margin-bottom: 1rem;
+        }
+        .edit-form label {
+            display: block;
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+        }
+        .edit-form input {
+            width: 100%;
+            max-width: 400px;
+            padding: 0.5rem;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+    </style>
+
+    <h1>Клиент: <span th:text="${client.name}"></span></h1>
+
+    <th:block th:unless="${editMode}">
+        <table class="car-specs-table">
+            <tbody>
+            <tr><th>ID</th><td th:text="${client.id}"></td></tr>
+            <tr><th>Email</th><td th:text="${client.email}"></td></tr>
+            <tr><th>Телефон</th><td th:text="${client.phone}"></td></tr>
+            <tr><th>Адрес</th><td th:text="${client.address != null ? client.address : 'Не указан'}"></td></tr>
+            <tr><th>Дата регистрации</th><td th:text="${client.registrationDate}"></td></tr>
+            </tbody>
+        </table>
+
+        <div class="actions-container">
+            <a th:href="@{/clients/{id}?edit=true(id=${client.id})}" class="btn btn-warning">Изменить</a>
+            <form th:action="@{/clients/{id}/delete(id=${client.id})}" method="post" style="display:inline">
+                <button type="submit" class="danger" onclick="return confirm('Удалить клиента?')">Удалить</button>
+            </form>
+        </div>
+    </th:block>
+
+    <th:block th:if="${editMode}">
+        <form class="edit-form" th:action="@{/clients/{id}/edit(id=${client.id})}" method="post" th:object="${client}">
+            <input type="hidden" th:field="*{id}"/>
+            <div>
+                <label>ФИО</label>
+                <input type="text" th:field="*{name}" required/>
+            </div>
+            <div>
+                <label>Email</label>
+                <input type="email" th:field="*{email}" required/>
+            </div>
+            <div>
+                <label>Телефон</label>
+                <input type="text" th:field="*{phone}" required/>
+            </div>
+            <div>
+                <label>Адрес</label>
+                <input type="text" th:field="*{address}"/>
+            </div>
+            <div class="actions-container">
+                <button type="submit">Сохранить изменения</button>
+                <a th:href="@{/clients/{id}(id=${client.id})}" class="btn" style="background-color: #6c757d;">Отмена</a>
+            </div>
+        </form>
+    </th:block>
+
+    <h2>Заказы клиента</h2>
+    <div class="order-list">
+        <div th:each="order : ${orders}" class="order-card">
+            <div class="order-card-body">
+                <h3 class="order-card-title" th:text="'Заказ #' + ${order.id}"></h3>
+                <ul class="order-card-specs">
+                    <li>
+                        <span class="spec-label">Автомобиль</span>
+                        <span class="spec-value" th:text="${order.car.configuration.model.brand.name + ' ' + order.car.configuration.model.name} + ' (' + ${order.car.VIN} + ')'"></span>
+                    </li>
+                    <li>
+                        <span class="spec-label">Дата заказа</span>
+                        <span class="spec-value" th:text="${order.orderDate}"></span>
+                    </li>
+                    <li>
+                        <span class="spec-label">Статус</span>
+                        <span class="spec-value" th:text="${order.status}"></span>
+                    </li>
+                </ul>
+                <form th:action="@{/orders/{id}/status(id=${order.id})}" method="post" style="display:inline">
+                    <select name="status" onchange="this.form.submit()" style="max-width: 200px;">
+                        <option th:each="s : ${T(web_prak.models.Order.OrderStatus).values()}"
+                                th:value="${s}" th:text="${s}"
+                                th:selected="${order.status == s}"></option>
+                    </select>
+                </form>
+            </div>
+        </div>
+        <div th:if="${#lists.isEmpty(orders)}">У клиента пока нет заказов.</div>
+    </div>
+</div>
+</body>
+</html>

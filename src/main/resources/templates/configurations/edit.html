@@ -1,0 +1,32 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{header :: layout(~{::content})}">
+<head>
+    <title>Редактировать комплектацию</title>
+</head>
+<body>
+<div th:fragment="content">
+    <h2>Редактирование комплектации</h2>
+    <form th:action="@{/configurations/{id}/edit(id=${config.id})}" method="post" th:object="${config}">
+        <input type="hidden" th:field="*{id}"/>
+        <div><label>Название: <input type="text" th:field="*{name}" required/></label></div>
+        <div><label>Тип двигателя: <input type="text" th:field="*{engineType}" required/></label></div>
+        <div><label>Мощность (л.с.): <input type="number" th:field="*{enginePower}" required/></label></div>
+        <div><label>Объём (л): <input type="number" step="0.1" th:field="*{engineVolume}" required/></label></div>
+        <div><label>Расход (л/100км): <input type="number" step="0.1" th:field="*{fuelConsumption}" required/></label></div>
+        <div><label>Тип топлива: <input type="text" th:field="*{fuelType}" required/></label></div>
+        <div><label>Объём бака (л): <input type="number" step="0.1" th:field="*{tankCapacity}" required/></label></div>
+        <div><label>Трансмиссия: <input type="text" th:field="*{transmissionType}" required/></label></div>
+        <div><label>Привод: <input type="text" th:field="*{driveType}" required/></label></div>
+        <div><label>Круиз-контроль: <input type="checkbox" th:field="*{hasCruiseControl}"/></label></div>
+        <div><label>Базовая стоимость: <input type="number" th:field="*{basicCost}" required/></label></div>
+        <div><label>Дверей: <input type="number" th:field="*{doorsCount}" required/></label></div>
+        <div><label>Мест: <input type="number" th:field="*{seatsNumber}" required/></label></div>
+        <div><label>Базовая: <input type="checkbox" th:field="*{isBasic}"/></label></div>
+        <div><label>Продажи остановлены: <input type="checkbox" th:field="*{isSalesStopped}"/></label></div>
+        <div><label>Доп. свойства (JSON): <textarea th:field="*{additionalProperties}"></textarea></label></div>
+        <button type="submit">Сохранить</button>
+        <a th:href="@{/models/{id}/edit(id=${config.model.id})}">Назад</a>
+    </form>
+</div>
+</body>
+</html>

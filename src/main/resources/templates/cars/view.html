@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{header :: layout(~{::content})}">
+<head>
+    <title th:text="'Автомобиль ' + ${car.configuration.model.brand.name} + ' ' + ${car.configuration.model.name}"></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+
+<div th:fragment="content" class="container py-4">
+    <style>
+        .car-specs-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 1rem;
+        }
+        .car-specs-table th,
+        .car-specs-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            text-align: left;
+            vertical-align: top;
+        }
+        .car-specs-table th {
+            width: 40%;
+            color: #6c757d;
+            font-weight: 500;
+            font-size: 0.95rem;
+            background-color: #fafbfc;
+        }
+        .car-specs-table td {
+            font-weight: 500;
+            color: #212529;
+            background-color: #ffffff;
+        }
+        .car-specs-table tr:last-child th,
+        .car-specs-table tr:last-child td {
+            border-bottom: none;
+        }
+        .spec-value-highlight {
+            font-weight: 600;
+            color: #198754;
+        }
+        .badge-cruise-yes {
+            background-color: #198754;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .badge-cruise-no {
+            background-color: #adb5bd;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        @media (max-width: 768px) {
+            .car-specs-table th,
+            .car-specs-table td {
+                padding: 10px 12px;
+                font-size: 0.85rem;
+            }
+            .car-specs-table th {
+                width: 45%;
+            }
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+
+        .car-photo {
+            border-radius: 30px;
+            display: inline-block;
+            max-height: 400px;
+            object-fit: contain;
+            background: #f8f9fa;
+        }
+
+        .edit-field {
+            display: none;
+            width: 100%;
+        }
+        .edit-mode .view-text {
+            display: none;
+        }
+        .edit-mode .edit-field {
+            display: inline-block;
+        }
+        .edit-mode td {
+            padding: 8px 12px;
+        }
+    </style>
+
+    <h1 class="mb-4 display-5 fw-semibold text-center"
+        th:text="${car.configuration.model.brand.name} + ' ' + ${car.configuration.model.name}"></h1>
+
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <img th:src="${'/images' + car.imageSrc}" alt="Фото автомобиля"
+                 class="car-photo img-fluid">
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-12 col-md-6">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="h4 mb-0 fw-semibold">Характеристики автомобиля</h3>
+                <th:block sec:authorize="hasRole('MANAGER')">
+                    <div>
+                        <button id="editBtn" class="btn btn-outline-secondary btn-sm" onclick="toggleEdit()">
+                            <i class="bi bi-pencil-square"></i> Редактировать
+                        </button>
+                        <button id="saveBtn" class="btn btn-success btn-sm" style="display: none;" onclick="saveChanges()">
+                            <i class="bi bi-check-lg"></i> Сохранить
+                        </button>
+                        <button id="cancelBtn" class="btn btn-outline-danger btn-sm" style="display: none;" onclick="cancelEdit()">
+                            <i class="bi bi-x-lg"></i> Отмена
+                        </button>
+                    </div>
+                </th:block>
+            </div>
+            <table class="car-specs-table" id="carSpecTable">
+                <tbody>
+                <tr>
+                    <th>VIN</th>
+                    <td>
+                        <span class="view-text" th:text="${car.VIN}"></span>
+                        <input type="text" class="edit-field form-control form-control-sm" name="vin" th:value="${car.VIN}">
+                    </td>
+                </tr>
+                <tr>
+                    <th>Цена</th>
+                    <td>
+                        <span class="view-text spec-value-highlight" th:text="${#numbers.formatInteger(car.cost, 0, 'COMMA')} + ' ₽'"></span>
+                        <input type="number" class="edit-field form-control form-control-sm" name="cost" th:value="${car.cost}">
+                    </td>
+                </tr>
+                <tr>
+                    <th>Год выпуска</th>
+                    <td>
+                        <span class="view-text" th:text="${car.year}"></span>
+                        <input type="number" class="edit-field form-control form-control-sm" name="year" th:value="${car.year}">
+                    </td>
+                </tr>
+                <tr>
+                    <th>Цвет кузова</th>
+                    <td>
+                        <span class="view-text" th:text="${car.color}"></span>
+                        <input type="text" class="edit-field form-control form-control-sm" name="color" th:value="${car.color}">
+                    </td>
+                </tr>
+                <tr>
+                    <th>Цвет салона</th>
+                    <td>
+                        <span class="view-text" th:text="${car.interiorColor}"></span>
+                        <input type="text" class="edit-field form-control form-control-sm" name="interiorColor" th:value="${car.interiorColor}">
+                    </td>
+                </tr>
+                <tr>
+                    <th>Обивка сидений</th>
+                    <td>
+                        <span class="view-text" th:text="${car.seatUpholstery != null ? car.seatUpholstery : '—'}"></span>
+                        <input type="text" class="edit-field form-control form-control-sm" name="seatUpholstery" th:value="${car.seatUpholstery ?: ''}">
+                    </td>
+                </tr>
+                <tr>
+                    <th>Пробег (км)</th>
+                    <td>
+                        <span class="view-text" th:text="${car.mileage != null ? #numbers.formatInteger(car.mileage, 0, 'COMMA') : '—'}"></span>
+                        <input type="number" class="edit-field form-control form-control-sm" name="mileage" th:value="${car.mileage}">
+                    </td>
+                </tr>
+                <tr>
+                    <th>Последнее ТО</th>
+                    <td>
+                        <span class="view-text" th:text="${car.lastLtoDate != null ? #temporals.format(car.lastLtoDate, 'dd.MM.yyyy') : '—'}"></span>
+                        <input type="date" class="edit-field form-control form-control-sm" name="lastLtoDate" th:value="${car.lastLtoDate}">
+                    </td>
+                </tr>
+                <tr>
+                    <th>Новый</th>
+                    <td>
+                        <span class="view-text" th:text="${car.isNew ? 'Да' : 'Нет'}"></span>
+                        <select class="edit-field form-select form-select-sm" name="isNew">
+                            <option value="true" th:selected="${car.isNew}">Да</option>
+                            <option value="false" th:selected="${!car.isNew}">Нет</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Тест-драйв доступен</th>
+                    <td>
+                        <span class="view-text" th:text="${car.isTestDriveAvailable ? 'Да' : 'Нет'}"></span>
+                        <select class="edit-field form-select form-select-sm" name="isTestDriveAvailable">
+                            <option value="true" th:selected="${car.isTestDriveAvailable}">Да</option>
+                            <option value="false" th:selected="${!car.isTestDriveAvailable}">Нет</option>
+                        </select>
+                    </td>
+                </tr>
+                <th:block sec:authorize="hasRole('MANAGER')">
+                    <tr>
+                        <th>Статус</th>
+                        <td>
+                            <span class="view-text" th:text="${car.status}"></span>
+                            <select class="edit-field form-select form-select-sm" name="status">
+                                <option th:each="status : ${statuses}" th:value="${status}" th:text="${status}" th:selected="${status == car.status}"></option>
+                            </select>
+                        </td>
+                    </tr>
+                </th:block>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-md-6 ps-4">
+            <h3 class="h4 mb-3 fw-semibold">Характеристики комплектации</h3>
+            <table class="car-specs-table">
+                <tbody>
+                <tr><th>Название комплектации</th><td th:text="${car.configuration.name}">–</td></tr>
+                <tr><th>Двигатель</th><td th:text="${car.configuration.engineType}">–</td></tr>
+                <tr><th>Мощность</th><td th:text="${car.configuration.enginePower} + ' л.с.'">–</td></tr>
+                <tr><th>Объём</th><td th:text="${car.configuration.engineVolume} + ' л'">–</td></tr>
+                <tr><th>Топливо</th><td th:text="${car.configuration.fuelType}">–</td></tr>
+                <tr><th>Расход</th><td th:text="${car.configuration.fuelConsumption} + ' л/100км'">–</td></tr>
+                <tr><th>Бак</th><td th:text="${car.configuration.tankCapacity} + ' л'">–</td></tr>
+                <tr><th>КПП</th><td th:text="${car.configuration.transmissionType}">–</td></tr>
+                <tr><th>Привод</th><td th:text="${car.configuration.driveType}">–</td></tr>
+                <tr>
+                    <th>Круиз-контроль</th>
+                    <td>
+                        <span th:if="${car.configuration.hasCruiseControl}" class="badge-cruise-yes">Да</span>
+                        <span th:unless="${car.configuration.hasCruiseControl}" class="badge-cruise-no">Нет</span>
+                    </td>
+                </tr>
+                <tr><th>Дверей</th><td th:text="${car.configuration.doorsCount}">–</td></tr>
+                <tr><th>Мест</th><td th:text="${car.configuration.seatsNumber}">–</td></tr>
+                <tr><th>Базовая стоимость</th><td class="spec-value-highlight" th:text="${#numbers.formatInteger(car.configuration.basicCost, 0, 'COMMA')} + ' ₽'">–</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="d-flex flex-wrap gap-3 mt-4 mb-4 justify-content-center">
+        <th:block sec:authorize="!hasRole('MANAGER')">
+            <th:block sec:authorize="isAuthenticated()">
+                <a th:href="@{/orders/create(carId=${car.id})}" class="btn btn-primary btn-lg px-4">
+                    <i class="bi bi-cart-check"></i> Оформить заказ
+                </a>
+            </th:block>
+        </th:block>
+        <th:block sec:authorize="hasRole('MANAGER')">
+            <form th:action="@{/cars/{id}/delete(id=${car.id})}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-outline-danger btn-lg px-4" onclick="return confirm('Удалить этот автомобиль?')">
+                    <i class="bi bi-trash3"></i> Удалить
+                </button>
+            </form>
+        </th:block>
+    </div>
+
+
+    <script th:inline="javascript">
+        function getCsrfToken() {
+            const meta = document.querySelector('meta[name="_csrf"]');
+            if (meta) return { header: meta.getAttribute('name'), token: meta.getAttribute('content') };
+            const cookies = document.cookie.split(';');
+            for (let c of cookies) {
+                const [name, value] = c.trim().split('=');
+                if (name === 'XSRF-TOKEN') return { header: 'X-XSRF-TOKEN', token: decodeURIComponent(value) };
+            }
+            return null;
+        }
+
+        function toggleEdit() {
+            document.getElementById('carSpecTable').classList.add('edit-mode');
+            document.getElementById('editBtn').style.display = 'none';
+            document.getElementById('saveBtn').style.display = 'inline-block';
+            document.getElementById('cancelBtn').style.display = 'inline-block';
+        }
+
+        function cancelEdit() {
+            document.getElementById('carSpecTable').classList.remove('edit-mode');
+            document.getElementById('editBtn').style.display = 'inline-block';
+            document.getElementById('saveBtn').style.display = 'none';
+            document.getElementById('cancelBtn').style.display = 'none';
+        }
+
+        async function saveChanges() {
+            const carId = [[${car.id}]];
+            const data = {};
+            const table = document.getElementById('carSpecTable');
+            const fields = table.querySelectorAll('.edit-field');
+            fields.forEach(field => {
+                const name = field.getAttribute('name');
+                let value = field.value;
+                if (field.type === 'number') {
+                    value = value === '' ? null : Number(value);
+                } else if (field.tagName === 'SELECT') {
+                    value = field.value === 'true' ? true : field.value === 'false' ? false : field.value;
+                }
+                data[name] = value;
+            });
+            if (data.lastLtoDate === '') data.lastLtoDate = null;
+
+            const csrf = getCsrfToken();
+            const headers = { 'Content-Type': 'application/json' };
+            if (csrf) headers[csrf.header] = csrf.token;
+
+            try {
+                const response = await fetch(`/cars/${carId}/update`, {
+                    method: 'PUT',
+                    headers: headers,
+                    body: JSON.stringify(data)
+                });
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('Ошибка при сохранении');
+                }
+            } catch (error) {
+                alert('Ошибка сети: ' + error.message);
+            }
+        }
+    </script>
+</div>
+</body>
+</html>

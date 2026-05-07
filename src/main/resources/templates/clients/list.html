@@ -1,0 +1,189 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{header :: layout(~{::content})}">
+<head>
+    <title>Клиенты</title>
+</head>
+<body>
+<div th:fragment="content">
+    <style>
+        .filter-panel {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fff;
+        }
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .row > div {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        div.client-grid {
+            display: grid !important;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+            gap: 20px !important;
+            padding-top: 10px !important;
+        }
+
+        div.client-card {
+            border: 1px solid #ddd !important;
+            border-radius: 12px !important;
+            overflow: hidden !important;
+            background: #fff !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+            display: flex !important;
+            flex-direction: column !important;
+            line-height: 1.3 !important;
+            position: relative !important;
+            z-index: 1 !important;
+            transition: transform 0.2s, box-shadow 0.2s !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        div.client-card:hover {
+            transform: translateY(-4px) !important;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15) !important;
+            z-index: 2 !important;
+        }
+
+        div.client-card div.client-card-body {
+            padding: 14px 16px !important;
+            flex: 1 !important;
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
+        h3.client-card-title {
+            font-size: 1rem !important;
+            font-weight: 600 !important;
+            margin: 0 0 8px 0 !important;
+            color: #2c3e50 !important;
+        }
+
+        ul.client-card-specs {
+            list-style: none !important;
+            padding: 0 !important;
+            margin: 0 0 12px 0 !important;
+            color: #444 !important;
+            font-size: 0.85rem !important;
+        }
+        ul.client-card-specs li {
+            display: flex !important;
+            justify-content: space-between !important;
+            padding: 3px 0 !important;
+            border-bottom: 1px solid #f0f0f0 !important;
+            margin: 0 !important;
+        }
+        ul.client-card-specs li:last-child {
+            border-bottom: none !important;
+        }
+        ul.client-card-specs li span.spec-label {
+            color: #888 !important;
+            font-weight: 500 !important;
+        }
+        ul.client-card-specs li span.spec-value {
+            font-weight: 500 !important;
+            text-align: right;
+        }
+
+        div.client-card div.actions {
+            display: flex !important;
+            gap: 8px !important;
+            margin-top: auto !important;
+            flex-wrap: wrap;
+        }
+
+        .btn, button {
+            padding: 5px 10px;
+            cursor: pointer;
+            text-decoration: none;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        .btn:hover, button:hover { background-color: #0056b3; }
+        .danger { background-color: #dc3545; }
+        .danger:hover { background-color: #b02a37; }
+    </style>
+
+    <h2>Клиенты</h2>
+
+    <div class="filter-panel">
+        <form th:action="@{/clients}" method="get">
+            <div class="row">
+                <div>
+                    <label>ID</label>
+                    <input type="number" name="id" th:value="${param.id}" placeholder="Любой"/>
+                </div>
+                <div>
+                    <label>ФИО</label>
+                    <input type="text" name="name" th:value="${param.name}" placeholder="Иванов Иван"/>
+                </div>
+                <div>
+                    <label>Email</label>
+                    <input type="text" name="email" th:value="${param.email}" placeholder="client@mail.ru"/>
+                </div>
+                <div>
+                    <label>Телефон</label>
+                    <input type="text" name="phone" th:value="${param.phone}" placeholder="+7..."/>
+                </div>
+                <div>
+                    <label>Адрес</label>
+                    <input type="text" name="address" th:value="${param.address}" placeholder="Москва..."/>
+                </div>
+                <div>
+                    <label>Дата регистрации</label>
+                    <input type="date" name="registrationDate" th:value="${param.registrationDate}"/>
+                </div>
+            </div>
+            <div style="margin-top:1rem;">
+                <button type="submit">Применить фильтр</button>
+                <a th:href="@{/clients}" class="btn">Сбросить</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="client-grid">
+        <div th:each="client : ${clients}" class="client-card">
+            <div class="client-card-body">
+                <h3 class="client-card-title" th:text="${client.name}"></h3>
+                <ul class="client-card-specs">
+                    <li>
+                        <span class="spec-label">ID</span>
+                        <span class="spec-value" th:text="${client.id}"></span>
+                    </li>
+                    <li>
+                        <span class="spec-label">Email</span>
+                        <span class="spec-value" th:text="${client.email}"></span>
+                    </li>
+                    <li>
+                        <span class="spec-label">Телефон</span>
+                        <span class="spec-value" th:text="${client.phone}"></span>
+                    </li>
+                    <li th:if="${client.address}">
+                        <span class="spec-label">Адрес</span>
+                        <span class="spec-value" th:text="${client.address}"></span>
+                    </li>
+                </ul>
+                <div class="actions">
+                    <a th:href="@{/clients/{id}(id=${client.id})}" class="btn">Подробнее</a>
+                    <form th:action="@{/clients/{id}/delete(id=${client.id})}" method="post" style="display:inline;">
+                        <button type="submit" class="danger">Удалить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <a th:href="@{/clients/add}" class="btn" style="margin-top:1rem;">Добавить клиента</a>
+</div>
+</body>
+</html>

@@ -1,0 +1,366 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{header :: layout(~{::content})}">
+<head>
+    <title>Модели</title>
+</head>
+<body>
+<div th:fragment="content">
+    <style>
+        .collapsible {
+            background-color: #f1f1f1; color: #444; cursor: pointer;
+            padding: 10px; width: 100%; border: none; text-align: left;
+            outline: none; font-size: 16px; font-weight: bold;
+            margin-top: 1rem; border-radius: 5px;
+        }
+        .active, .collapsible:hover { background-color: #ddd; }
+        .collapsible:after { content: '\002B'; float: right; font-weight: bold; }
+        .active:after { content: "\2212"; }
+        .collapse-content {
+            padding: 0 18px; max-height: 0; overflow: hidden;
+            transition: max-height 0.2s ease-out; background-color: #f9f9f9;
+            border-radius: 0 0 5px 5px;
+        }
+        .row { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 15px; }
+        .row > div { flex: 1; min-width: 150px; }
+
+        .model-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            padding-top: 10px;
+        }
+
+        .model-card {
+            border: 1px solid #ddd !important;
+            border-radius: 12px !important;
+            overflow: hidden !important;
+            background: #fff !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+            display: flex !important;
+            flex-direction: column !important;
+            line-height: 1.3 !important;
+            position: relative !important;
+            z-index: 1 !important;
+            transition: transform 0.2s, box-shadow 0.2s !important;
+            padding: 0 !important;     /* убираем паддинги, унаследованные от .card */
+            margin: 0 !important;
+        }
+        .model-card:hover {
+            transform: translateY(-4px) !important;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15) !important;
+            z-index: 2 !important;
+        }
+
+        .model-card-img-container {
+            width: 100%;
+            height: 180px;
+            overflow: hidden;
+        }
+        .model-card-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .model-card-body {
+            padding: 12px 15px !important;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .model-card-title {
+            font-size: 1rem !important;
+            font-weight: 600 !important;
+            margin: 0 0 6px 0 !important;
+            color: #2c3e50 !important;
+        }
+
+        .model-card-specs {
+            list-style: none !important;
+            padding: 0 !important;
+            margin: 0 0 10px 0 !important;
+            color: #444 !important;
+            font-size: 0.85rem !important;
+        }
+        .model-card-specs li {
+            display: flex !important;
+            justify-content: space-between !important;
+            padding: 3px 0 !important;
+            border-bottom: 1px solid #f0f0f0 !important;
+        }
+        .model-card-specs li:last-child {
+            border-bottom: none !important;
+        }
+        .spec-label {
+            color: #888 !important;
+            font-weight: 500 !important;
+        }
+        .spec-value {
+            font-weight: 500 !important;
+        }
+        .price-value {
+            color: #198754 !important;
+            font-weight: 700 !important;
+            font-size: 1rem !important;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            margin-top: auto;
+        }
+        .btn, button {
+            padding: 5px 10px;
+            cursor: pointer;
+            text-decoration: none;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        .btn:hover, button:hover { background-color: #0056b3; }
+        .danger { background-color: #dc3545; }
+        .danger:hover { background-color: #b02a37; }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('click', function(e) {
+                var btn = e.target.closest('.collapsible');
+                if (!btn) return;
+                e.preventDefault();
+                btn.classList.toggle('active');
+                var content = btn.nextElementSibling;
+                if (!content || !content.classList.contains('collapse-content')) {
+                    content = btn.parentNode.querySelector('.collapse-content');
+                }
+                if (content) {
+                    if (content.style.maxHeight && content.style.maxHeight !== '0px') {
+                        content.style.maxHeight = '0px';
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                    }
+                }
+            });
+        });
+    </script>
+
+    <h2>Список моделей</h2>
+    <div class="filter-panel">
+        <form th:action="@{/models}" method="get">
+            <div class="row">
+                <th:block sec:authorize="hasRole('MANAGER')">
+                    <div>
+                        <label>ID модели</label>
+                        <input type="number" name="id" th:value="${param.id}" placeholder="Любой"/>
+                    </div>
+                </th:block>
+                <div>
+                    <label>Название модели</label>
+                    <input type="text" name="name" th:value="${param.name}" placeholder="Camry"/>
+                </div>
+                <div>
+                    <label>Год от</label>
+                    <input type="number" name="yearMin" th:value="${param.yearMin}" placeholder="2020"/>
+                </div>
+                <div>
+                    <label>Год до</label>
+                    <input type="number" name="yearMax" th:value="${param.yearMax}" placeholder="2025"/>
+                </div>
+                <div>
+                    <label>Мин. стоимость от</label>
+                    <input type="number" name="minCostMin" th:value="${param.minCostMin}" placeholder="1000000"/>
+                </div>
+                <div>
+                    <label>Мин. стоимость до</label>
+                    <input type="number" name="minCostMax" th:value="${param.minCostMax}" placeholder="5000000"/>
+                </div>
+            </div>
+
+            <button type="button" class="collapsible">📋 Характеристики комплектации (показать/скрыть)</button>
+            <div class="collapse-content">
+                <div style="margin-top: 1rem; border-top: 1px solid #ddd; padding-top: 1rem;">
+                    <div class="row">
+                        <div>
+                            <label>Название комплектации</label>
+                            <input type="text" name="configuration.name" th:value="${param['configuration.name']}" placeholder="Comfort"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div>
+                            <label>Мощность (л.с.) от</label>
+                            <input type="number" name="configuration.enginePowerMin" th:value="${param['configuration.enginePowerMin']}" placeholder="100"/>
+                        </div>
+                        <div>
+                            <label>Мощность (л.с.) до</label>
+                            <input type="number" name="configuration.enginePowerMax" th:value="${param['configuration.enginePowerMax']}" placeholder="300"/>
+                        </div>
+                        <div>
+                            <label>Объём двигателя от</label>
+                            <input type="text" name="configuration.engineVolumeMin" th:value="${param['configuration.engineVolumeMin']}" placeholder="1.6"/>
+                        </div>
+                        <div>
+                            <label>Объём двигателя до</label>
+                            <input type="text" name="configuration.engineVolumeMax" th:value="${param['configuration.engineVolumeMax']}" placeholder="3.0"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div>
+                            <label>Тип двигателя</label>
+                            <input type="text" name="configuration.engineType" th:value="${param['configuration.engineType']}" placeholder="Бензин"/>
+                        </div>
+                        <div>
+                            <label>Расход от</label>
+                            <input type="text" name="configuration.fuelConsumptionMin" th:value="${param['configuration.fuelConsumptionMin']}" placeholder="5"/>
+                        </div>
+                        <div>
+                            <label>Расход до</label>
+                            <input type="text" name="configuration.fuelConsumptionMax" th:value="${param['configuration.fuelConsumptionMax']}" placeholder="10"/>
+                        </div>
+                        <div>
+                            <label>Тип топлива</label>
+                            <input type="text" name="configuration.fuelType" th:value="${param['configuration.fuelType']}" placeholder="АИ-95"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div>
+                            <label>Объём бака от</label>
+                            <input type="text" name="configuration.tankCapacityMin" th:value="${param['configuration.tankCapacityMin']}" placeholder="40"/>
+                        </div>
+                        <div>
+                            <label>Объём бака до</label>
+                            <input type="text" name="configuration.tankCapacityMax" th:value="${param['configuration.tankCapacityMax']}" placeholder="80"/>
+                        </div>
+                        <div>
+                            <label>Круиз-контроль</label>
+                            <select name="configuration.hasCruiseControl">
+                                <option value="">Не важно</option>
+                                <option value="true" th:selected="${param['configuration.hasCruiseControl'] == 'true'}">Да</option>
+                                <option value="false" th:selected="${param['configuration.hasCruiseControl'] == 'false'}">Нет</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Базовая цена от</label>
+                            <input type="number" name="configuration.basicCostMin" th:value="${param['configuration.basicCostMin']}" placeholder="1 000 000"/>
+                        </div>
+                        <div>
+                            <label>Базовая цена до</label>
+                            <input type="number" name="configuration.basicCostMax" th:value="${param['configuration.basicCostMax']}" placeholder="5 000 000"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div>
+                            <label>Количество мест от</label>
+                            <input type="number" name="configuration.seatsNumberMin" th:value="${param['configuration.seatsNumberMin']}" placeholder="4"/>
+                        </div>
+                        <div>
+                            <label>Количество мест до</label>
+                            <input type="number" name="configuration.seatsNumberMax" th:value="${param['configuration.seatsNumberMax']}" placeholder="7"/>
+                        </div>
+                        <div>
+                            <label>Количество дверей от</label>
+                            <input type="number" name="configuration.doorsCountMin" th:value="${param['configuration.doorsCountMin']}" placeholder="2"/>
+                        </div>
+                        <div>
+                            <label>Количество дверей до</label>
+                            <input type="number" name="configuration.doorsCountMax" th:value="${param['configuration.doorsCountMax']}" placeholder="5"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div>
+                            <label>Трансмиссия</label>
+                            <input type="text" name="configuration.transmissionType" th:value="${param['configuration.transmissionType']}" placeholder="Автомат"/>
+                        </div>
+                        <div>
+                            <label>Привод</label>
+                            <input type="text" name="configuration.driveType" th:value="${param['configuration.driveType']}" placeholder="Полный"/>
+                        </div>
+                        <div>
+                            <label>Базовая комплектация</label>
+                            <select name="configuration.isBasic">
+                                <option value="">Не важно</option>
+                                <option value="true" th:selected="${param['configuration.isBasic'] == 'true'}">Да</option>
+                                <option value="false" th:selected="${param['configuration.isBasic'] == 'false'}">Нет</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Продажи остановлены</label>
+                            <select name="configuration.isSalesStopped">
+                                <option value="">Не важно</option>
+                                <option value="true" th:selected="${param['configuration.isSalesStopped'] == 'true'}">Да</option>
+                                <option value="false" th:selected="${param['configuration.isSalesStopped'] == 'false'}">Нет</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <th:block sec:authorize="hasRole('MANAGER')">
+                        <div class="row">
+                            <div>
+                                <label>ID комплектации</label>
+                                <input type="number" name="configuration.id" th:value="${param['configuration.id']}" placeholder="ID"/>
+                            </div>
+                            <div>
+                                <label>ID бренда</label>
+                                <input type="number" name="brand.id" th:value="${param['brand.id']}" placeholder="ID бренда"/>
+                            </div>
+                            <div>
+                                <label>Доп. свойства (JSON)</label>
+                                <input type="text" name="additionalProperties" th:value="${param.additionalProperties}" placeholder="JSON"/>
+                            </div>
+                        </div>
+                    </th:block>
+                </div>
+            </div>
+
+            <div class="row" style="margin-top: 1rem;">
+                <div>
+                    <label>Название бренда</label>
+                    <input type="text" name="brand.name" th:value="${param['brand.name']}" placeholder="Toyota"/>
+                </div>
+            </div>
+
+            <div style="margin-top:1rem;">
+                <button type="submit">Применить фильтр</button>
+                <a th:href="@{/models}" class="btn">Сбросить</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="model-grid">
+        <div th:each="model : ${models}" class="model-card">
+            <div class="model-card-img-container">
+                <img th:src="${model.imageSrc}" alt="Фото модели"/>
+            </div>
+            <div class="model-card-body">
+                <h3 class="model-card-title" th:text="${model.brand.name + ' ' + model.name}"></h3>
+                <ul class="model-card-specs">
+                    <li>
+                        <span class="spec-label">Базовая цена</span>
+                        <span class="spec-value price-value" th:text="${#numbers.formatInteger(model.minCost, 0, 'COMMA')} + ' ₽'"></span>
+                    </li>
+                    <li>
+                        <span class="spec-label">Год выпуска</span>
+                        <span class="spec-value" th:text="${model.year}"></span>
+                    </li>
+                </ul>
+                <div class="actions">
+                    <a th:href="@{/models/{id}(id=${model.id})}" class="btn">Подробнее</a>
+                    <th:block sec:authorize="hasRole('MANAGER')">
+                        <form th:action="@{/models/{id}/delete(id=${model.id})}" method="post" style="display:inline;">
+                            <button type="submit" class="danger">Удалить</button>
+                        </form>
+                    </th:block>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block sec:authorize="hasRole('MANAGER')">
+        <a th:href="@{/models/add}" class="btn" style="margin-top:1rem;">Добавить модель</a>
+    </th:block>
+</div>
+</body>
+</html>

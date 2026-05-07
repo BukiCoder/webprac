@@ -1,0 +1,155 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{header :: layout(~{::content})}">
+<head>
+    <title>Марки</title>
+</head>
+<body>
+<div th:fragment="content">
+    <style>
+        div.brand-grid {
+            display: grid !important;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+            gap: 20px !important;
+            padding-top: 10px !important;
+        }
+
+        div.brand-card {
+            border: 1px solid #ddd !important;
+            border-radius: 12px !important;
+            overflow: hidden !important;
+            background: #fff !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+            display: flex !important;
+            flex-direction: column !important;
+            line-height: 1.3 !important;
+            position: relative !important;
+            z-index: 1 !important;
+            transition: transform 0.2s, box-shadow 0.2s !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        div.brand-card:hover {
+            transform: translateY(-4px) !important;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15) !important;
+            z-index: 2 !important;
+        }
+
+        div.brand-card div.brand-logo-container {
+            width: 100% !important;
+            height: 120px !important;
+            overflow: hidden !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #fafafa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        div.brand-card div.brand-logo-container img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain !important;
+            display: block !important;
+            max-height: none !important;
+        }
+
+        div.brand-card div.brand-card-body {
+            padding: 12px 15px !important;
+            flex: 1 !important;
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
+        h3.brand-card-title {
+            font-size: 1rem !important;
+            font-weight: 600 !important;
+            margin: 0 0 6px 0 !important;
+            color: #2c3e50 !important;
+            line-height: 1.3 !important;
+        }
+
+        ul.brand-card-specs {
+            list-style: none !important;
+            padding: 0 !important;
+            margin: 0 0 10px 0 !important;
+            color: #444 !important;
+            font-size: 0.85rem !important;
+        }
+        ul.brand-card-specs li {
+            display: flex !important;
+            justify-content: space-between !important;
+            padding: 3px 0 !important;
+            border-bottom: 1px solid #f0f0f0 !important;
+            margin: 0 !important;
+        }
+        ul.brand-card-specs li:last-child {
+            border-bottom: none !important;
+        }
+        ul.brand-card-specs li span.spec-label {
+            color: #888 !important;
+            font-weight: 500 !important;
+        }
+        ul.brand-card-specs li span.spec-value {
+            font-weight: 500 !important;
+        }
+
+        div.brand-card div.actions {
+            display: flex !important;
+            gap: 8px !important;
+            margin-top: auto !important;
+              flex-wrap: wrap !important;
+        }
+
+        .btn, button {
+            padding: 5px 10px;
+            cursor: pointer;
+            text-decoration: none;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        .btn:hover, button:hover { background-color: #0056b3; }
+        .danger { background-color: #dc3545; }
+        .danger:hover { background-color: #b02a37; }
+    </style>
+
+    <h2>Марки автомобилей</h2>
+
+    <div style="display: flex !important; flex-wrap: wrap !important; gap: 20px !important; padding-top: 10px !important; justify-content: flex-start !important;">
+        <div th:each="brand : ${brands}" class="brand-card" style="flex: 0 0 280px !important; max-width: 300px !important;">
+            <div class="brand-logo-container">
+                <img th:src="${'/images' + brand.logoSrc}" alt="Логотип"/>
+            </div>
+            <div class="brand-card-body">
+                <h3 class="brand-card-title" th:text="${brand.name}"></h3>
+                <ul class="brand-card-specs">
+                    <li>
+                        <span class="spec-label">Год основания</span>
+                        <span class="spec-value" th:text="${brand.creationYear}"></span>
+                    </li>
+                    <li th:if="${brand.countryCode}">
+                        <span class="spec-label">Страна</span>
+                        <span class="spec-value" th:text="${brand.countryCode}"></span>
+                    </li>
+                </ul>
+                <div class="actions">
+                    <a th:href="@{/brands/{id}(id=${brand.id})}" class="btn">Подробнее</a>
+                    <th:block sec:authorize="hasRole('MANAGER')">
+                        <a th:href="@{/brands/{id}/edit(id=${brand.id})}" class="btn" style="background-color: #ffc107; border:none; color:black;">Изменить</a>
+                        <form th:action="@{/brands/{id}/delete(id=${brand.id})}" method="post" style="display:inline;">
+                            <button type="submit" class="danger">Удалить</button>
+                        </form>
+                    </th:block>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block sec:authorize="hasRole('MANAGER')">
+        <a th:href="@{/brands/add}" class="btn" style="margin-top:1rem; background-color: #28a745; border:none;">Добавить марку</a>
+    </th:block>
+</div>
+</body>
+</html>

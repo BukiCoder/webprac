@@ -1,0 +1,273 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{header :: layout(~{::content})}">
+<head>
+    <title>Список заказов</title>
+</head>
+<body>
+<div th:fragment="content">
+    <style>
+        .filter-row { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 10px; }
+        .filter-row > div { flex: 1; min-width: 150px; }
+        .filter-panel { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+
+        .order-list { display: flex; flex-direction: column; gap: 20px; }
+
+        div.order-card {
+            border: 1px solid #ddd !important;
+            border-radius: 12px !important;
+            overflow: hidden !important;
+            background: #fff !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+            display: flex !important;
+            flex-direction: column !important;
+            line-height: 1.3 !important;
+            position: relative !important;
+            z-index: 1 !important;
+            transition: transform 0.2s, box-shadow 0.2s !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        div.order-card:hover {
+            transform: translateY(-4px) !important;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15) !important;
+            z-index: 2 !important;
+        }
+
+        div.order-card div.order-card-body {
+            padding: 14px 16px !important;
+            flex: 1 !important;
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
+        h3.order-card-title {
+            font-size: 1.1rem !important;
+            font-weight: 600 !important;
+            margin: 0 0 8px 0 !important;
+            color: #2c3e50 !important;
+        }
+
+        ul.order-card-specs {
+            list-style: none !important;
+            padding: 0 !important;
+            margin: 0 0 12px 0 !important;
+            color: #444 !important;
+            font-size: 0.9rem !important;
+        }
+        ul.order-card-specs li {
+            display: flex !important;
+            justify-content: space-between !important;
+            padding: 4px 0 !important;
+            border-bottom: 1px solid #f0f0f0 !important;
+            margin: 0 !important;
+        }
+        ul.order-card-specs li:last-child {
+            border-bottom: none !important;
+        }
+        ul.order-card-specs li span.spec-label {
+            color: #888 !important;
+            font-weight: 500 !important;
+            white-space: nowrap;
+            margin-right: 10px;
+        }
+        ul.order-card-specs li span.spec-value {
+            font-weight: 500 !important;
+            text-align: right;
+        }
+
+        div.order-card div.actions {
+            display: flex !important;
+            gap: 8px !important;
+            margin-top: auto !important;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn, button {
+            padding: 5px 10px;
+            cursor: pointer;
+            text-decoration: none;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        .btn:hover, button:hover { background-color: #0056b3; }
+        .danger { background-color: #dc3545; }
+        .danger:hover { background-color: #b02a37; }
+    </style>
+
+    <script>
+        function toggleTestDriveFields(checkbox) {
+            const fields = document.getElementById('testDriveFields');
+            if (checkbox.checked) {
+                fields.style.display = 'flex';
+            } else {
+                fields.style.display = 'none';
+                fields.querySelectorAll('input').forEach(input => input.value = '');
+            }
+        }
+        function toggleDeliveryFields(checkbox) {
+            const fields = document.getElementById('deliveryFields');
+            if (checkbox.checked) {
+                fields.style.display = 'flex';
+            } else {
+                fields.style.display = 'none';
+                fields.querySelectorAll('input').forEach(input => input.value = '');
+            }
+        }
+    </script>
+
+    <h2>Заказы</h2>
+
+    <div class="filter-panel">
+        <form th:action="@{/orders}" method="get">
+            <div class="filter-row">
+                <div>
+                    <label>ID клиента</label>
+                    <input type="number" name="clientId" th:value="${param.clientId}" placeholder="ID"/>
+                </div>
+                <div>
+                    <label>ID машины</label>
+                    <input type="number" name="carId" th:value="${param.carId}" placeholder="ID"/>
+                </div>
+                <div>
+                    <label>Статус</label>
+                    <select name="status">
+                        <option value="">Все</option>
+                        <option th:each="s : ${T(web_prak.models.Order.OrderStatus).values()}"
+                                th:value="${s}" th:text="${s}"
+                                th:selected="${param.status == s.name()}"></option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-row">
+                <div>
+                    <label>Дата заказа с</label>
+                    <input type="date" name="orderDateFrom" th:value="${param.orderDateFrom}"/>
+                </div>
+                <div>
+                    <label>Дата заказа по</label>
+                    <input type="date" name="orderDateTo" th:value="${param.orderDateTo}"/>
+                </div>
+            </div>
+            <div class="filter-row">
+                <div>
+                    <label>
+                        <input type="checkbox" onchange="toggleTestDriveFields(this)"
+                               th:checked="${param.testDriveDateFrom != null or param.testDriveDurationMin != null}"/>
+                        С тест-драйвом
+                    </label>
+                </div>
+            </div>
+            <div id="testDriveFields" class="filter-row"
+                 th:style="${param.testDriveDateFrom != null or param.testDriveDurationMin != null} ? 'display:flex' : 'display:none'">
+                <div>
+                    <label>Дата ТД с</label>
+                    <input type="datetime-local" name="testDriveDateFrom" th:value="${param.testDriveDateFrom}"/>
+                </div>
+                <div>
+                    <label>Дата ТД по</label>
+                    <input type="datetime-local" name="testDriveDateTo" th:value="${param.testDriveDateTo}"/>
+                </div>
+                <div>
+                    <label>Длит. (мин) от</label>
+                    <input type="number" name="testDriveDurationMin" th:value="${param.testDriveDurationMin}" placeholder="0"/>
+                </div>
+                <div>
+                    <label>Длит. (мин) до</label>
+                    <input type="number" name="testDriveDurationMax" th:value="${param.testDriveDurationMax}" placeholder="999"/>
+                </div>
+            </div>
+            <div class="filter-row">
+                <div>
+                    <label>
+                        <input type="checkbox" onchange="toggleDeliveryFields(this)"
+                               th:checked="${param.deliveryDateFrom != null or param.deliveryAddress != null}"/>
+                        С доставкой
+                    </label>
+                </div>
+            </div>
+            <div id="deliveryFields" class="filter-row"
+                 th:style="${param.deliveryDateFrom != null or param.deliveryAddress != null} ? 'display:flex' : 'display:none'">
+                <div>
+                    <label>Дата доставки с</label>
+                    <input type="date" name="deliveryDateFrom" th:value="${param.deliveryDateFrom}"/>
+                </div>
+                <div>
+                    <label>Дата доставки по</label>
+                    <input type="date" name="deliveryDateTo" th:value="${param.deliveryDateTo}"/>
+                </div>
+                <div>
+                    <label>Адрес доставки</label>
+                    <input type="text" name="deliveryAddress" th:value="${param.deliveryAddress}" placeholder="Город, улица"/>
+                </div>
+            </div>
+            <div class="filter-row" sec:authorize="hasRole('MANAGER')">
+                <div>
+                    <label>
+                        <input type="checkbox" name="myOrders" value="true"
+                               th:checked="${param.myOrders != null}"/>
+                        Мои заказы
+                    </label>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 1rem;">
+                <button type="submit">Применить фильтр</button>
+                <a th:href="@{/orders}" class="btn">Сбросить</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="order-list">
+        <div th:each="order : ${orders}" class="order-card">
+            <div class="order-card-body">
+                <h3 class="order-card-title" th:text="'Заказ #' + ${order.id}"></h3>
+                <ul class="order-card-specs">
+                    <li>
+                        <span class="spec-label">Клиент</span>
+                        <span class="spec-value" th:text="${order.client.name} + ' (ID: ' + ${order.client.id} + ')'"></span>
+                    </li>
+                    <li>
+                        <span class="spec-label">Автомобиль</span>
+                        <span class="spec-value" th:text="${order.car.configuration.model.brand.name + ' ' + order.car.configuration.model.name} + ' (' + ${order.car.VIN} + ')'"></span>
+                    </li>
+                    <li>
+                        <span class="spec-label">Дата заказа</span>
+                        <span class="spec-value" th:text="${order.orderDate}"></span>
+                    </li>
+                    <li th:if="${order.testDriveDate != null}">
+                        <span class="spec-label">Тест-драйв</span>
+                        <span class="spec-value" th:text="${order.testDriveDate} + ' (' + ${order.testDriveDuration} + ' мин)'"></span>
+                    </li>
+                    <li th:if="${order.deliveryAddress != null}">
+                        <span class="spec-label">Доставка</span>
+                        <span class="spec-value" th:text="${order.deliveryAddress} + ', ' + ${order.deliveryDate}"></span>
+                    </li>
+                    <li>
+                        <span class="spec-label">Статус</span>
+                        <span class="spec-value" th:text="${order.status}"></span>
+                    </li>
+                    <li sec:authorize="hasRole('MANAGER')">
+                        <span class="spec-label">Менеджер</span>
+                        <span class="spec-value" th:text="${order.manager.name}"></span>
+                    </li>
+                </ul>
+                <div class="actions">
+                    <form sec:authorize="hasRole('MANAGER')" th:action="@{/orders/{id}/status(id=${order.id})}" method="post" style="display:inline">
+                        <select name="status" onchange="this.form.submit()" style="max-width: 180px;">
+                            <option th:each="s : ${T(web_prak.models.Order.OrderStatus).values()}"
+                                    th:value="${s}" th:text="${s}"
+                                    th:selected="${order.status == s}"></option>
+                        </select>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div th:if="${#lists.isEmpty(orders)}">Нет заказов</div>
+    </div>
+</div>
+</body>
+</html>

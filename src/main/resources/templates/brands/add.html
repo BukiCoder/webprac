@@ -1,0 +1,22 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{header :: layout(~{::content})}">
+<head>
+    <title>Добавить марку</title>
+</head>
+<body>
+<div th:fragment="content">
+    <h2>Добавление новой марки</h2>
+    <form th:action="@{/brands/add}" method="post" th:object="${brand}">
+        <div><label>Название: <input type="text" th:field="*{name}" required/></label></div>
+        <div><label>Год основания: <input type="number" th:field="*{creationYear}" required/></label></div>
+        <div><label>Телефон: <input type="text" th:field="*{contactPhone}" required/></label></div>
+        <div><label>Email: <input type="email" th:field="*{contactEmail}" required/></label></div>
+        <div><label>Описание: <textarea th:field="*{description}"></textarea></label></div>
+        <div><label>Адрес: <input type="text" th:field="*{address}"/></label></div>
+        <div><label>Код страны (3 буквы): <input type="text" th:field="*{countryCode}" maxlength="3" required/></label></div>
+        <div><label>URL логотипа: <input type="text" th:field="*{logoSrc}" required/></label></div>
+        <button type="submit">Добавить</button>
+    </form>
+</div>
+</body>
+</html>

@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" xmlns="http://www.w3.org/1999/html"
+      th:fragment="layout(content)">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${title} ?: 'Автосалон'">Автосалон</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <script th:inline="javascript">
+        // Автоматическое определение текущей страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-main a, .nav-auth a');
+  navLinks.forEach(link => {
+
+                    link.classList.remove('active');
+
+            });
+            navLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href && currentPath === href) {
+                    link.classList.add('active');
+                } else if (href && currentPath.startsWith(href) && href !== '/') {
+                    // Для вложенных путей (например /cars/create)
+                    link.classList.add('active');
+                }
+            });
+
+            // Особый случай для главной страницы
+            if (currentPath === '/' || currentPath === '') {
+                const homeLink = document.querySelector('.nav-main a[href="/"]');
+                if (homeLink) {
+                    homeLink.classList.add('active');
+                }
+            }
+        });
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        .nav-auth .btn-logout,
+.nav-auth form button.btn-logout {
+    background-color: #e74c3c !important;
+    border: 1px solid #e74c3c !important;
+    color: white !important;
+}
+
+.nav-auth .btn-logout:hover,
+.nav-auth form button.btn-logout:hover {
+    background-color: #c0392b !important;
+}
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #3498db;
+            --light: #ecf0f1;
+            --white: #ffffff;
+            --border: #bdc3c7;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f5f7fa;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+        header {
+            background-color: var(--primary);
+            padding: 1rem 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        header nav {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-main {
+            display: flex;
+            gap: 0.25rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-auth {
+            display: flex;
+            gap: 0.25rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+ h1 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+        }
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background-color: #f5f7fa;
+    color: #2c3e50;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.content {
+    max-width: 1100px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    flex: 1;
+}
+
+footer {
+    text-align: center;
+    padding: 1.5rem;
+    background-color: var(--primary);
+    color: var(--white);
+    margin-top: auto;
+
+}
+        h2 {
+            margin-top: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            margin-top: 0;
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+
+        /* Отступ для первого параграфа после заголовка */
+        h1 + p, h2 + p {
+            margin-top: 0.25rem;
+        }
+        header nav a {
+            color: var(--white);
+            text-decoration: none;
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            letter-spacing: 0.3px;
+        }
+
+        header nav .nav-main a {
+            background-color: transparent;
+        }
+
+        header nav .nav-main a:hover {
+            background-color: rgba(255,255,255,0.15);
+            transform: translateY(-1px);
+        }
+
+        header nav .nav-main a.active {
+            background-color: rgba(255,255,255,0.2);
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .nav-auth .btn-login {
+            background-color: transparent;
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        .nav-auth .btn-login:hover {
+            background-color: rgba(255,255,255,0.15);
+            border-color: var(--white);
+        }
+
+        .nav-auth .btn-register {
+            background-color: var(--accent);
+            border: 1px solid var(--accent);
+        }
+
+        .nav-auth .btn-register:hover {
+            background-color: #2980b9;
+            transform: translateY(-1px);
+        }
+
+        .nav-auth .btn-logout {
+            background-color: #e74c3c;
+            border: 1px solid #e74c3c;
+        }
+
+        .nav-auth .btn-logout:hover {
+            background-color: #c0392b;
+        }
+
+        .nav-auth .btn-cabinet {
+            background-color: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .nav-divider {
+            width: 1px;
+            height: 24px;
+            background-color: rgba(255,255,255,0.3);
+            margin: 0 0.5rem;
+        }
+
+        .nav-icon {
+            margin-right: 0.3rem;
+            font-size: 0.9rem;
+        }
+
+        .content {
+            max-width: 1100px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        h1, h2, h3 {
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        button, .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border: none;
+            background-color: var(--accent);
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            text-decoration: none;
+        }
+        button:hover, .btn:hover {
+            background-color: #2980b9;
+        }
+        button[type="submit"]:not(.danger) {
+            background-color: var(--accent);
+        }
+        .danger {
+            background-color: #e74c3c !important;
+        }
+        form div {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+        }
+        input, select, textarea {
+            width: 100%;
+            max-width: 400px;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+        input[type="checkbox"] {
+            width: auto;
+            margin-left: 0.5rem;
+        }
+        textarea {
+            resize: vertical;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        .card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .card img {
+            max-height: 120px;
+            width: auto;
+            display: block;
+            margin: 0 auto 0.5rem;
+        }
+        .card h3 {
+            margin: 0.5rem 0;
+        }
+        .card p {
+            margin: 0.25rem 0;
+            color: #555;
+        }
+        .card .actions {
+            margin-top: 0.75rem;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.5rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--light);
+        }
+        .filter-panel {
+            background: var(--white);
+            padding: 1.25rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-bottom: 2rem;
+        }
+        .filter-panel .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+        }
+        .filter-panel .row > div {
+            flex: 1;
+            min-width: 150px;
+        }
+        .pagination {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            background-color: var(--primary);
+            color: var(--white);
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            header nav {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .nav-main, .nav-auth {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .nav-divider {
+                display: none;
+            }
+
+            header nav a {
+                padding: 0.5rem 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <nav>
+        <div class="nav-main">
+            <a th:href="@{/}" class="active">Главная</a>
+            <a th:href="@{/cars}">Автомобили</a>
+            <a th:href="@{/models}">Модели</a>
+            <a th:href="@{/brands}">Марки</a>
+        </div>
+
+        <div class="nav-auth">
+            <th:block sec:authorize="isAuthenticated()">
+                <th:block sec:authorize="!hasRole('MANAGER')">
+                <a th:href="@{/cabinet}" class="btn-cabinet">👤 Личный кабинет</a>
+            </th:block>
+                <th:block sec:authorize="hasRole('MANAGER')">
+                    <a th:href="@{/orders}">Заказы</a>
+                    <a th:href="@{/clients}">Клиенты</a>
+                </th:block>
+                <span class="nav-divider"></span>
+                <form th:action="@{/logout}" method="post" style="display: inline;">
+                <button type="submit" class="btn-logout">Выйти</button>
+                </form>
+            </th:block>
+            <th:block sec:authorize="!isAuthenticated()">
+                <a th:href="@{/login}" class="btn-login">Войти</a>
+
+                <a th:href="@{/register}" class="btn-register">Регистрация</a>
+
+            </th:block>
+        </div>
+    </nav>
+</header>
+<div class="content">
+    <th:block th:insert="${content}"/>
+</div>
+<footer>
+    <p>© 2026 Автосалон</p>
+</footer>
+</body>
+</html>

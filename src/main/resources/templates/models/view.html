@@ -1,0 +1,138 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{header :: layout(~{::content})}">
+<head>
+    <title th:text="'Модель ' + ${model.brand.name + ' ' + model.name}"></title>
+</head>
+<body>
+<div th:fragment="content">
+    <style>
+        .car-specs-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 1rem;
+        }
+        .car-specs-table th, .car-specs-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            text-align: left;
+            vertical-align: top;
+        }
+        .car-specs-table th {
+            width: 40%;
+            color: #6c757d;
+            font-weight: 500;
+            font-size: 0.95rem;
+            background-color: #fafbfc;
+        }
+        .car-specs-table td {
+            font-weight: 500;
+            color: #212529;
+            background-color: #ffffff;
+        }
+        .car-specs-table tr:last-child th, .car-specs-table tr:last-child td {
+            border-bottom: none;
+        }
+        .config-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .config-card {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            min-width: 200px;
+            cursor: pointer;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            color: inherit;
+        }
+        .config-card.active {
+            border-color: #007bff;
+            box-shadow: 0 0 8px rgba(0,123,255,0.3);
+        }
+        .config-card:hover {
+            border-color: #007bff;
+        }
+        .config-card .name {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        .config-card .price {
+            color: #198754;
+            font-weight: 600;
+        }
+        .config-card .differences {
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: #555;
+        }
+    </style>
+
+    <h2 th:text="${model.brand.name + ' ' + model.name}"></h2>
+    <img th:src="${model.imageSrc}" alt="Фото модели" style="max-width:100%; height:auto; border-radius:10px; margin-bottom:20px;"/>
+    <p>Год начала выпуска: <strong th:text="${model.year}"></strong></p>
+    <p>Минимальная стоимость: <strong th:text="${#numbers.formatInteger(model.minCost, 0, 'COMMA')} + ' руб.'"></strong></p>
+
+    <h3>Комплектации</h3>
+    <div class="config-list">
+        <a th:each="config : ${configurations}" th:href="@{/models/{modelId}/config(configId=${config.id}, modelId=${model.id})}"
+           class="config-card" th:classappend="${config.id == selectedConfig.id} ? 'active'">
+            <div class="name" th:text="${config.name}"></div>
+            <div class="price" th:text="'от ' + ${#numbers.formatInteger(config.basicCost, 0, 'COMMA')} + ' руб.'"></div>
+            <div class="differences" th:if="${differencesMap != null and differencesMap.containsKey(config.id)}">
+                <div th:each="diff : ${differencesMap.get(config.id)}" th:text="${diff}"></div>
+            </div>
+        </a>
+    </div>
+
+    <div class="config-details" th:if="${selectedConfig != null}">
+        <h4>Характеристики: <span th:text="${selectedConfig.name}"></span></h4>
+        <table class="car-specs-table">
+            <tbody>
+            <tr><th>Двигатель</th><td th:text="${selectedConfig.engineType}"></td></tr>
+            <tr><th>Мощность</th><td th:text="${selectedConfig.enginePower} + ' л.с.'"></td></tr>
+            <tr><th>Объём</th><td th:text="${selectedConfig.engineVolume} + ' л'"></td></tr>
+            <tr><th>Топливо</th><td th:text="${selectedConfig.fuelType}"></td></tr>
+            <tr><th>Расход</th><td th:text="${selectedConfig.fuelConsumption} + ' л/100км'"></td></tr>
+            <tr><th>Бак</th><td th:text="${selectedConfig.tankCapacity} + ' л'"></td></tr>
+            <tr><th>КПП</th><td th:text="${selectedConfig.transmissionType}"></td></tr>
+            <tr><th>Привод</th><td th:text="${selectedConfig.driveType}"></td></tr>
+            <tr>
+                <th>Круиз-контроль</th>
+                <td>
+                    <span th:if="${selectedConfig.hasCruiseControl}" style="color:green; font-weight:bold;">Да</span>
+                    <span th:unless="${selectedConfig.hasCruiseControl}" style="color:red;">Нет</span>
+                </td>
+            </tr>
+            <tr><th>Дверей</th><td th:text="${selectedConfig.doorsCount}"></td></tr>
+            <tr><th>Мест</th><td th:text="${selectedConfig.seatsNumber}"></td></tr>
+            <tr th:if="${selectedConfig.additionalProperties != null and selectedConfig.additionalProperties != ''}">
+                <th>Доп. свойства</th>
+                <td th:text="${selectedConfig.additionalProperties}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <a th:href="@{/cars(configuration.model.id=${model.id})}"
+       style="background-color:#007bff; color:white; padding:10px 20px; text-decoration:none; border-radius:5px; margin-top:20px; display:inline-block;">
+        Показать автомобили этой модели
+    </a>
+
+    <th:block sec:authorize="hasRole('MANAGER')">
+        <p style="margin-top:20px;">ID модели: <span th:text="${model.id}"></span></p>
+        <a th:href="@{/models/{id}/edit(id=${model.id})}" class="btn" style="background-color: #ffc107; border: none; padding: 8px 16px; border-radius: 5px; color: black; text-decoration: none;">Изменить</a>
+        <form th:action="@{/models/{id}/addConfig(id=${model.id})}" method="post" style="display:inline; margin-left:10px;">
+            <button type="submit" class="btn" style="background-color: #28a745; border: none; padding: 8px 16px; border-radius: 5px; color: white;">Добавить комплектацию</button>
+        </form>
+    </th:block>
+</div>
+</body>
+</html>

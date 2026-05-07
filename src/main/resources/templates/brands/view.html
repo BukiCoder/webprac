@@ -1,0 +1,106 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{header :: layout(~{::content})}">
+<head>
+    <title th:text="'Марка ' + ${brand.name}"></title>
+</head>
+<body>
+<div th:fragment="content">
+    <style>
+        .car-specs-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 1rem;
+        }
+        .car-specs-table th,
+        .car-specs-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            text-align: left;
+            vertical-align: top;
+        }
+        .car-specs-table th {
+            width: 40%;
+            color: #6c757d;
+            font-weight: 500;
+            font-size: 0.95rem;
+            background-color: #fafbfc;
+        }
+        .car-specs-table td {
+            font-weight: 500;
+            color: #212529;
+            background-color: #ffffff;
+        }
+        .car-specs-table tr:last-child th,
+        .car-specs-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .actions-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+        .btn-lg {
+            padding: 10px 20px;
+            font-size: 1.1rem;
+        }
+    </style>
+
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <img th:src="${'/images' + brand.logoSrc}" alt="Логотип"
+             style="max-height: 250px; max-width: 100%; height: auto; display: block; margin: 0 auto 1rem;">
+        <h2 th:text="${brand.name}" style="margin-bottom: 0.5rem;"></h2>
+        <p th:if="${brand.description}" th:text="${brand.description}" style="color: #555;"></p>
+    </div>
+
+    <h3>Информация о марке</h3>
+    <table class="car-specs-table">
+        <tbody>
+        <tr>
+            <th>Год основания</th>
+            <td th:text="${brand.creationYear}">–</td>
+        </tr>
+        <tr>
+            <th>Страна (код)</th>
+            <td th:text="${brand.countryCode}">–</td>
+        </tr>
+        <tr>
+            <th>Телефон</th>
+            <td th:text="${brand.contactPhone}">–</td>
+        </tr>
+        <tr>
+            <th>Email</th>
+            <td th:text="${brand.contactEmail}">–</td>
+        </tr>
+        <tr>
+            <th>Адрес</th>
+            <td th:text="${brand.address != null ? brand.address : 'Не указан'}">–</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="actions-container">
+        <a th:href="@{/models(brand.id=${brand.id})}" class="btn btn-lg" style="background-color: #007bff;">
+            Показать модели этой марки
+        </a>
+        <th:block sec:authorize="hasRole('MANAGER')">
+            <a th:href="@{/brands/{id}/edit(id=${brand.id})}" class="btn btn-lg" style="background-color: #ffc107; color: black;">
+                Изменить
+            </a>
+            <form th:action="@{/brands/{id}/delete(id=${brand.id})}" method="post" style="display: inline;">
+                <button type="submit" class="btn btn-lg" style="background-color: #dc3545;" onclick="return confirm('Удалить эту марку?')">
+                    Удалить
+                </button>
+            </form>
+        </th:block>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{header :: layout(~{::content})}">
+<head>
+    <title>Главная - АвтоИмперия</title>
+</head>
+<body>
+<div th:fragment="content">
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <img th:src="@{/images/salon.png}" alt="АвтоИмперия" style="max-width:100%; border-radius: 10px;"/>
+    </div>
+    <h1 style="text-align: center; font-size: 2.5rem; margin-bottom: 0.5rem;">
+        АвтоИмперия
+    </h1>
+    <p style="text-align: center; font-size: 1.2rem; color: #555; margin-bottom: 2rem;">
+        Ваш надёжный партнёр в мире автомобилей
+    </p>
+
+    <h2>О нас</h2>
+    <p>
+        «АвтоИмперия» — это современный автосалон, который помогает людям находить идеальные автомобили.
+        Мы предлагаем широкий выбор новых и подержанных машин от ведущих мировых производителей.
+        Наша команда экспертов всегда готова помочь с выбором, оформить кредит или лизинг,
+        организовать тест-драйв и доставку в любой регион. Мы ценим ваше время и доверие,
+        поэтому каждая сделка прозрачна, а каждый автомобиль проходит тщательную проверку.
+    </p>
+
+    <h2>Почему выбирают нас</h2>
+    <div class="grid" style="margin-bottom: 2rem;">
+        <div class="card" style="text-align: center;">
+            <h3>Более 500 авто в наличии</h3>
+            <p>От седанов до внедорожников — всегда есть из чего выбрать.</p>
+        </div>
+        <div class="card" style="text-align: center;">
+            <h3>Гарантия до 3 лет</h3>
+            <p>На все автомобили действует официальная гарантия и постгарантийное обслуживание.</p>
+        </div>
+        <div class="card" style="text-align: center;">
+            <h3>Тест-драйв за час</h3>
+            <p>Запишитесь онлайн и уже сегодня окажетесь за рулём.</p>
+        </div>
+        <div class="card" style="text-align: center;">
+            <h3>Выгодные цены</h3>
+            <p>Прямые поставки и регулярные акции позволяют нам держать доступные цены.</p>
+        </div>
+        <div class="card" style="text-align: center;">
+            <h3>Доставка по всей стране</h3>
+            <p>Привезём автомобиль к вашему дому или офису.</p>
+        </div>
+        <div class="card" style="text-align: center;">
+            <h3>Поддержка 24/7</h3>
+            <p>Консультации, запись на сервис и помощь в любое время.</p>
+        </div>
+    </div>
+
+
+    <h2>Контакты</h2>
+    <p><strong>Адрес:</strong> г. Москва, ул. Ленина, д. 1</p>
+    <p><strong>Телефон:</strong> +7 (495) 123-45-67</p>
+    <p><strong>Email:</strong> info@autoimperia.ru</p>
+    <p><strong>Режим работы:</strong> ежедневно с 9:00 до 21:00</p>
+</div>
+</body>
+</html>
